@@ -486,13 +486,23 @@ class Spotify:
 		elif os.path.exists("/usr/local/bin/" + cmd): path = "/usr/local/bin/" + cmd
 		
 		return path
-	
+
+	# read gnome configuration to match ui scale factor
+	def scaleFactor(self):
+		gsettings = self.which('gsettings')
+		if gsettings != False:
+			scaleFactor = cmd_output.getoutput(gsettings + ' get org.gnome.desktop.interface scaling-factor').split(' ')[-1]
+			if scaleFactor.isdigit():
+				return scaleFactor
+		return '1'
+
 	# Just launch Spotify in background
 	def launch(self):
 		spotify = self.which('spotify')
 			
 		if spotify != False:
-			os.system(spotify + ' > /dev/null 2>&1 &')
+			cmd = spotify + ' --force-device-scale-factor=' + self.scaleFactor() +'  > /dev/null 2>&1 &'
+			os.system(cmd);
 			time.sleep(1);
 			
 			return cmd_output.getoutput('pidof spotify').strip()
